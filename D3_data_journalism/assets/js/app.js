@@ -54,7 +54,7 @@ function makeResponsive() {
     })
     // CREAR FUNCIONES ESCALADORAS
     let yScale = d3.scaleLinear()
-        .domain([0, d3.max(csvData, d=>d.smokes)])
+        .domain([8, d3.max(csvData, d=>d.smokes)])
         .range([chartHeight, 0]);
 
     let xScale = d3.scaleLinear()
@@ -77,48 +77,23 @@ function makeResponsive() {
         .call(xAxis)
 
 
-    // CREAR AXES LABELS
-    chartGroup.append("text")
-    .attr("transform", rotate(-90))
-    .attr("y", 0 - margin.left + 40)
-    .attr("x", 0 - (chartHeight/1.35))
-    .attr("dy", 0 - "1em")
-    .text("Smokers (%)");
-
-    chartGroup.append("text")
-    .attr("transform", `translate(${chartWidth / 3}, ${chartHeight + margin.top + 30})`)
-    .text("Age (%)");
 
 
-    // CREATE STATE TEXT
-    let stateGroup = chartGroup.append("text")
-    .selectAll("tspan")
-    .data(data)
-    .enter()
-    .append("tspan")
-    .attr("class","stateText")
-    .attr("x", d=> xScale(d.age))
-    .attr("y", d=> yScale(d.smokes) +4)
-    .text(d=> d.abbr);
 
-    let abbr = data.map(d=> d.abbr);
-    console.log("All Abbr", abbr)
+
 
     // CREAR CIRCULOS
-    let circleGroup = chartGroup.selectAll("circle")
+    let circlesGroup = chartGroup.selectAll("circle")
     .data(csvData)
     .enter()
     .append("circle")
     .attr("cx", d=> xScale(d.age))
     .attr("cy", d=> yScale(d.smokes))
-    .attr("r", "10")
-    .attr("fill", "gold")
-    .attr("stroke-width", "1")
-    .attr("stroke", "black")
+    .attr("r", "20")
     .attr("opacity", ".5")
     .attr("class", "stateCircle");
 
-
+    //  INSERTAR ABREVIACIONES DE LOS ESTADOS EN LOS CIRCULOS 
     chartGroup
         .append("g")
         .selectAll("text")
@@ -135,30 +110,61 @@ function makeResponsive() {
         .attr("fill", "white");
         // Hasta aqui funciona bien
 
+    // // CREATE STATE TEXT
+    // let stateGroup = chartGroup.append("text")
+    // .selectAll("tspan")
+    // .data(csvData)
+    // .enter()
+    // .append("tspan")
+    // .attr("class","stateText")
+    // .attr("x", d=> xScale(d.age))
+    // .attr("y", d=> yScale(d.smokes) +4)
+    // .text(d=> d.abbr);
+
+    // let abbr = csvData.map(d=> d.abbr);
+    // console.log("All Abbr", abbr)
+
 
 //     // CREAR TOOLTIPS
     let toolTip = d3.tip()
+    // VINCULAR CON LA CLASE D3-TIP DEL D3STYLE FILE
         .attr("class", "d3-tip")
-        .offset([0, 0])
+        .offset([80, 60])
         .html(function(d){
-            return (`<strong>${d.state}<strong><hr>${d.age}<hr>${d.smokes}`);
+            return(`${d.state}<br>Age${d.age}<br>${d.smokes}`);
         });
-    // INSERTAR TOOLTIPS
+    // INSERTAR TOOLTIPS EN EL CHART
     chartGroup.call(toolTip);
 
-            // CREAR CLICK LISTENER
-    
-
-
+    // CREAR CLICK LISTENER
+    circlesGroup.on("click", d => {
+        toolTip.show(d, this)
+    })
 
     // CREAR EVENT LISTENERS
-    circlesGroup.on("mouseover", function(d) {
-        toolTip.hide(data);
+    // MOUSEOVER PARA MOSTRAR LOS TOOLTIPS
+    // circlesGroup.on("mouseover", d=> {
+    //     toolTip.show(d.this);
+    // })
+    // MOUSE OUT PARA OCULTAR LOS TOOLTIPS
+        .on("mouseout", d=> {
+            toolTip.hide(d);
+
+    // CREAR AXES LABELS
+    chartGroup.append("text")
+    .attr("transform", rotate(-90))
+    .attr("y", 0 - margin.left + 40)
+    .attr("x", 0 - (chartHeight/2))
+    .attr("dy", "1em")
+    .text("Smokers (%)");
+
+    chartGroup.append("text")
+    .attr("transform", `translate(${chartWidth / 3}, ${chartHeight + margin.top + 30})`)
+    .text("Age (%)");
+    });
+    }).catch(function(error){
+        console.log(error);
     })
-        .on("mouseout", function(data, index) {
-            toolTip.hide(data);
-    });
-    });
     };
 ;
 
